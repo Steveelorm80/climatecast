@@ -1,5 +1,8 @@
 package com.climatecast.weather_service.model;
-public class WeatherResponse {
+
+import java.io.Serializable;
+
+public class WeatherResponse implements Serializable {
 
     private String city;
     private double temperature;
