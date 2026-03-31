@@ -21,6 +21,7 @@ public class WeatherController {
 
     @GetMapping
     public WeatherResponse getWeather(@RequestParam String city){
+        System.out.println("REQUEST HIT: " + city);
         return weatherService.getWeather(city);
     }
     @GetMapping("/risk")
