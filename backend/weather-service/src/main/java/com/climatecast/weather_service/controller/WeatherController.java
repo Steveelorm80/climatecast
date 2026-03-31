@@ -19,11 +19,21 @@ public class WeatherController {
         this.weatherService = weatherService;
     }
 
+    // @GetMapping
+    // public WeatherResponse getWeather(@RequestParam String city){
+    //     System.out.println("REQUEST HIT: " + city);
+    //     return weatherService.getWeather(city);
+    // }
     @GetMapping
-    public WeatherResponse getWeather(@RequestParam String city){
+public WeatherResponse getWeather(@RequestParam String city){
+    try {
         System.out.println("REQUEST HIT: " + city);
         return weatherService.getWeather(city);
+    } catch (Exception e) {
+        e.printStackTrace();   
+        throw e;
     }
+}
     @GetMapping("/risk")
     public Map<String, Object> getRisk(
         @RequestParam String city,
