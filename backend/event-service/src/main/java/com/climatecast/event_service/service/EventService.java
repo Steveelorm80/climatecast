@@ -1,28 +1,3 @@
-// package com.climatecast.event_service.service;
-
-// import com.climatecast.event_service.model.Event;
-// import com.climatecast.event_service.repository.EventRepository;
-// import org.springframework.stereotype.Service;
-
-// import java.util.List;
-
-// @Service
-// public class EventService {
-
-//     private final EventRepository repository;
-
-//     public EventService(EventRepository repository){
-//         this.repository = repository;
-//     }
-
-//     public Event create(Event event){
-//         return repository.save(event);
-//     }
-
-//     public List<Event> getAll(){
-//         return repository.findAll();
-//     }
-// }
 
 package com.climatecast.event_service.service;
 
