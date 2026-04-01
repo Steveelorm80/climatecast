@@ -1,22 +1,16 @@
 package com.climatecast.weather_service.controller;
+
 import org.springframework.beans.factory.annotation.Value;
-
-import com.climatecast.weather_service.model.WeatherResponse;
+//import com.climatecast.weather_service.model.WeatherResponse;
 import com.climatecast.weather_service.service.WeatherService;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.json.JSONObject;
 import org.json.JSONArray;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -25,89 +19,75 @@ public class WeatherController {
 
     private final WeatherService weatherService;
 
-    public WeatherController(WeatherService weatherService){
+    public WeatherController(WeatherService weatherService) {
         this.weatherService = weatherService;
     }
 
-    // @GetMapping
-    // public WeatherResponse getWeather(@RequestParam String city){
-    //     System.out.println("REQUEST HIT: " + city);
-    //     return weatherService.getWeather(city);
-    // }
+    @Value("${openweather.api.key}")
+    private String apiKey;
 
-//public WeatherResponse getWeather(@RequestParam String city){
-// public Object getWeather(@RequestParam String city){
-//     try {
-//         return weatherService.getWeather(city);
-//     } catch (Exception e) {
-//         System.out.println("ERROR: " + e.getMessage());
+    // ✅ FIXED: Added @GetMapping and @RequestParam
+    @GetMapping
+    public Object getWeather(@RequestParam String city) {
+        try {
+            String url = "https://api.openweathermap.org/data/2.5/weather?q="
+                    + city + "&appid=" + apiKey + "&units=metric";
 
-//         // 🔥 FALLBACK RESPONSE (IMPORTANT)
-//         WeatherResponse fallback = new WeatherResponse();
-//         fallback.setCity(city);
-//         fallback.setTemperature(20.0);
-//         fallback.setCondition("Unavailable (API error)");
-//         fallback.setHumidity(0);
+            RestTemplate restTemplate = new RestTemplate();
+            String response = restTemplate.getForObject(url, String.class);
 
-//         return fallback;
-//     }
-// }
- @Value("${openweather.api.key}")
-private String apiKey;
-public Object getWeather(String city) {
-    try {
-        String url = "https://api.openweathermap.org/data/2.5/weather?q="
-                + city + "&appid=" + apiKey + "&units=metric";
+            JSONObject json = new JSONObject(response);
 
-        RestTemplate restTemplate = new RestTemplate();
-        String response = restTemplate.getForObject(url, String.class);
+            double temp = json.getJSONObject("main").getDouble("temp");
+            int humidity = json.getJSONObject("main").getInt("humidity");
+            String condition = json.getJSONArray("weather")
+                                   .getJSONObject(0)
+                                   .getString("main");
 
-        JSONObject json = new JSONObject(response);
+            Map<String, Object> result = new HashMap<>();
+            result.put("city", city);
+            result.put("temperature", temp);
+            result.put("condition", condition);
+            result.put("humidity", humidity);
 
-        double temp = json.getJSONObject("main").getDouble("temp");
-        int humidity = json.getJSONObject("main").getInt("humidity");
-        String condition = json.getJSONArray("weather")
-                               .getJSONObject(0)
-                               .getString("main");
+            return result;
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("city", city);
-        result.put("temperature", temp);
-        result.put("condition", condition);
-        result.put("humidity", humidity);
-
-        return result;
-
-    } catch (Exception e) {
-        System.out.println("REAL ERROR: " + e.getMessage());
-        throw e; // 🔥 TEMP: let it crash so we see real issue
+        } catch (Exception e) {
+            System.out.println("ERROR: " + e.getMessage());
+            e.printStackTrace(); // This will help debug the actual error
+            
+            // Return a proper error response
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to fetch weather data");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("city", city);
+            return errorResponse;
+        }
     }
-}
 
     @GetMapping("/risk")
     public Map<String, Object> getRisk(
-        @RequestParam String city,
-        @RequestParam String date) {
+            @RequestParam String city,
+            @RequestParam String date) {
+        return weatherService.calculateRisk(city, date);
+    }
 
-    return weatherService.calculateRisk(city, date);
-}
     @GetMapping("/best-day")
     public Map<String, Object> getBestDay(@RequestParam String city) {
-    return weatherService.findBestDay(city);
-}
+        return weatherService.findBestDay(city);
+    }
+
     @GetMapping("/forecast")
     public Map getForecast(@RequestParam String city) {
-    return weatherService.getForecast(city);
+        return weatherService.getForecast(city);
+    }
 }
-
-
 
 @Data
 @NoArgsConstructor
-public class WeatherResponse {
+class WeatherResponse {
     private String city;
     private double temperature;
     private String condition;
     private int humidity;
-}
 }
