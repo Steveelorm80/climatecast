@@ -1,21 +1,16 @@
-
 package com.climatecast.event_service.model;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-import java.time.LocalDate; // ✅ ADD THIS
-
-@Data
-@Document(collection = "events")
+@Data  // This generates getters, setters, toString, equals, hashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
-
-    @Id
     private String id;
-
     private String name;
     private String city;
-    private LocalDate date;
-    private String type;
+    private String date;
+    private String description;
 }

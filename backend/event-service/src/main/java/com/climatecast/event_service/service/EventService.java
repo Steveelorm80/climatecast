@@ -1,51 +1,83 @@
-
 package com.climatecast.event_service.service;
 
 import com.climatecast.event_service.model.Event;
-import com.climatecast.event_service.repository.EventRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class EventService {
 
-    private final EventRepository repository;
     private final WeatherClient weatherClient;
     private final EventRiskService riskService;
+    
+    // In-memory storage instead of MongoDB
+    private final Map<String, Event> eventStore = new ConcurrentHashMap<>();
+    private final AtomicLong idGenerator = new AtomicLong(1);
 
-    public EventService(EventRepository repository,
-                        WeatherClient weatherClient,
+    public EventService(WeatherClient weatherClient,
                         EventRiskService riskService) {
-        this.repository = repository;
         this.weatherClient = weatherClient;
         this.riskService = riskService;
     }
 
-    public Map create(Event event){
+    public Map<String, Object> create(Event event) {
+        // Generate ID and save event to memory
+        String eventId = String.valueOf(idGenerator.getAndIncrement());
+        event.setId(eventId);
+        eventStore.put(eventId, event);
+        
+        // Get weather data
+        Map<String, Object> weather = weatherClient.getWeather(event.getCity());
 
-        Event saved = repository.save(event);
+        double wind = weather.get("wind") != null
+                ? Double.parseDouble(weather.get("wind").toString()) : 0.0;
 
-        Map weather = weatherClient.getWeather(event.getCity());
-
-        double wind = (double) weather.get("wind");
         double rainProbability = weather.get("rainProbability") != null
-                ? (double) weather.get("rainProbability") : 0.0;
+                ? Double.parseDouble(weather.get("rainProbability").toString()) : 0.0;
 
         String risk = riskService.calculateRisk(rainProbability, wind);
         String recommendation = riskService.recommendation(risk);
 
-        Map response = new HashMap();
-        response.put("event", saved);
+        Map<String, Object> response = new HashMap<>();
+        response.put("event", event);
         response.put("eventRisk", risk);
         response.put("recommendation", recommendation);
+        response.put("weather", weather);
 
         return response;
     }
-
-    public List<Event> getAll(){
-        return repository.findAll();
+    
+    // ✅ Add this method - it's called by EventController.getEvents()
+    public List<Event> getAll() {
+        return new ArrayList<>(eventStore.values());
+    }
+    
+    // Optional additional methods
+    public Optional<Event> getById(String id) {
+        return Optional.ofNullable(eventStore.get(id));
+    }
+    
+    public void delete(String id) {
+        eventStore.remove(id);
+    }
+    
+    public Map<String, Object> update(String id, Event event) {
+        if (eventStore.containsKey(id)) {
+            event.setId(id);
+            eventStore.put(id, event);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("event", event);
+            return response;
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", "Event not found");
+        return response;
     }
 }
