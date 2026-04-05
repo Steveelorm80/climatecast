@@ -2,7 +2,7 @@
 ClimateCast is a modern SaaS-style weather dashboard that combines real-time weather data with AI-powered insights to help users plan outdoor activities more effectively.
 
 🚀 Live Demo
-👉
+👉https://climatecast-app.vercel.app/dashboard
 
 ✨ Features
 🌆 Dynamic City Search — Get weather data for any city worldwide
@@ -11,8 +11,12 @@ ClimateCast is a modern SaaS-style weather dashboard that combines real-time wea
 ⭐ Best Day Prediction — Identify optimal days for outdoor events
 📱 Responsive Design — Works seamlessly on mobile and desktop
 ⚡ Real-Time Data — Powered by live weather APIs
+
 🖼️ Dashboard Preview
-(Add a screenshot here — optional but recommended)
+
+![Dashboard](docs/screenshots/dashboard1.jpg)
+![Dashboard](docs/screenshots/dashboard2.jpg)
+
 
 🏗️ Tech Stack
 Frontend
@@ -93,8 +97,17 @@ npm install
 
 3. Run the development server
 npm run dev
-📈 Future Improvements 📅 Calendar integration for event planning 🔔 Smart weather alerts & notifications 🌍 Multi-city comparison dashboard ☁️ Cloud deployment with Azure 🤖 Advanced ML-based weather predictions 👨‍💻 Author
 
+📈 Future Improvements 
+
+📅 Calendar integration for event planning 
+🔔 Smart weather alerts & notifications 
+🌍 Multi-city comparison dashboard 
+☁️ Cloud deployment with Azure 
+🤖 Advanced ML-based weather predictions 
+
+👨‍💻 Author
+Stephen Kwaku Pometsey
 @steveelorm80 GitHub: https://github.com/steveelorm80
 
 📄 License
