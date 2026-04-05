@@ -41,47 +41,32 @@ Frontend: Vercel
 Backend: Docker (local), future cloud deployment planned (Azure / Render)
 📂 Project Structure
 ```bash
-climatecast/
+frontend/
+├── app/
+│   ├── dashboard/
+│   │   └── page.js         
+│   ├── layout.tsx           
+│   ├── page.tsx             
+│   └── globals.css          
 │
-├── backend/                     # Microservices (Java)
-│   ├── api-gateway/
-│   ├── weather-service/
-│   ├── prediction-service/
-│   ├── event-service/
-│   └── docker-compose.yml      # (next step)
+├── components/
+│   ├── Header.jsx           
+│   ├── Sidebar.jsx          
+│   ├── MobileWeather.jsx    
+│   ├── RiskAssessment.jsx   
+│   ├── BestDayCard.jsx      
+│   ├── AIInsight.jsx        
+│   ├── StatsCards.jsx       
+│   ├── Footer.jsx           
+│   └── WeatherChart.jsx     
 │
-├── frontend/                   # Next.js app
-│   ├── app/
-│   │   ├── dashboard/
-│   │   │   └── page.js
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   │
-│   ├── components/             # UI components
-│   │   ├── Header.jsx
-│   │   ├── Sidebar.jsx
-│   │   ├── Footer.jsx
-│   │   └── WeatherChart.jsx
-│   │
-│   ├── services/               # API calls 
-│   │   └── api.js
-│   │
-│   ├── utils/                 
-│   │   └── formatDate.js
-│   │
-│   ├── public/
-│   │   └── screenshot.png
-│   │
-│   ├── .env.local
-│   ├── package.json
-│   └── README.md
+├── services/
+│   └── api.js               
 │
-├── docs/                       # Documentation
-│   ├── architecture.md
-│   └── system-design.md
+├── utils/
+│   └── riskUtils.js         
 │
-├── README.md                   # ROOT README (important)
-└── .gitignore
+└── public/                  
 
 ```
 
