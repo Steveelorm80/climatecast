@@ -2,7 +2,7 @@
 ClimateCast is a modern SaaS-style weather dashboard that combines real-time weather data with AI-powered insights to help users plan outdoor activities more effectively.
 
 🚀 Live Demo
-👉https://climatecast-app.vercel.app/dashboard
+👉 https://climatecast-app.vercel.app/dashboard
 
 ✨ Features
 🌆 Dynamic City Search — Get weather data for any city worldwide
