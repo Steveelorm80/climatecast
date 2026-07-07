@@ -1,7 +1,7 @@
 // components/Header.jsx
 "use client";
 
-export default function Header({ city, setCity }) {
+export default function Header({ city, setCity, isLoading = false }) {
   return (
     <div className="bg-white p-4 shadow flex flex-col md:flex-row md:justify-between md:items-center gap-3 sticky top-0 z-10">
       <h1 className="text-xl font-bold">📊 Climate Dashboard</h1>
@@ -16,13 +16,14 @@ export default function Header({ city, setCity }) {
           }}
         />
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg whitespace-nowrap"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg whitespace-nowrap disabled:bg-gray-400"
           onClick={() => {
-            const input = document.querySelector("input").value;
-            setCity(input);
+            const input = document.querySelector("input");
+            if (input) setCity(input.value);
           }}
+          disabled={isLoading}
         >
-          Search
+          {isLoading ? "Loading..." : "Search"}
         </button>
       </div>
     </div>
