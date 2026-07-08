@@ -3,14 +3,18 @@
 
 import { getRiskColor } from "@/utils/riskUtils";
 
-export default function RiskAssessment({ 
-  eventName, 
-  setEventName, 
-  loadingRisk, 
-  riskAssessment, 
+export default function RiskAssessment({
+  eventName,
+  setEventName,
+  eventDate,
+  setEventDate,
+  loadingRisk,
+  riskAssessment,
   assessEventRisk,
-  city 
+  city
 }) {
+  const today = new Date().toISOString().split("T")[0];
+
   return (
     <div className="bg-white p-4 md:p-6 rounded-2xl shadow mb-6">
       <h2 className="text-xl font-bold mb-4">🎯 Event Risk Assessment</h2>
@@ -21,6 +25,14 @@ export default function RiskAssessment({
           className="flex-1 border px-3 py-2 rounded-lg"
           value={eventName}
           onChange={(e) => setEventName(e.target.value)}
+        />
+        <input
+          type="date"
+          className="border px-3 py-2 rounded-lg"
+          value={eventDate}
+          min={today}
+          onChange={(e) => setEventDate(e.target.value)}
+          title="Event date"
         />
         <button
           onClick={assessEventRisk}
@@ -51,7 +63,7 @@ export default function RiskAssessment({
             Risk Level: {riskAssessment.eventRisk}
           </h3>
           <p className="mb-3">{riskAssessment.recommendation}</p>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-3 pt-3 border-t border-white/20">
             <div>
               <p className="text-sm opacity-90">Temperature</p>

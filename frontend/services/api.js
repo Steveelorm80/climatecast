@@ -18,6 +18,8 @@ API.interceptors.request.use(async (config) => {
 export const getWeather = (city) => API.get(`/weather?city=${city}`);
 export const getBestDay = (city) => API.get(`/weather/best-day?city=${city}`);
 export const getForecast = (city) => API.get(`/weather/forecast?city=${city}`);
+export const getRiskForDate = (city, date) =>
+  API.get(`/weather/risk?city=${city}&date=${date}`);
 
 // Events with risk assessment
 export const createEventWithRisk = async (eventData) => {
@@ -32,5 +34,15 @@ export const getAllEvents = async () => {
 
 export const getEventRisk = async (eventId) => {
   const response = await API.get(`/events/${eventId}`);
+  return response.data;
+};
+
+export const updateEvent = async (eventId, eventData) => {
+  const response = await API.put(`/events/${eventId}`, eventData);
+  return response.data; // { success, event } or { success: false, message }
+};
+
+export const deleteEvent = async (eventId) => {
+  const response = await API.delete(`/events/${eventId}`);
   return response.data;
 };

@@ -156,6 +156,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import MobileWeather from "@/components/MobileWeather";
 import RiskAssessment from "@/components/RiskAssessment";
+import MyEvents from "@/components/MyEvents";
 import BestDayCard from "@/components/BestDayCard";
 import AIInsight from "@/components/AIInsight";
 import StatsCards from "@/components/StatsCards";
@@ -172,7 +173,17 @@ export default function Dashboard() {
   const [riskAssessment, setRiskAssessment] = useState(null);
   const [loadingRisk, setLoadingRisk] = useState(false);
   const [eventName, setEventName] = useState("");
-  
+  const [eventDate, setEventDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  // My Events only appears after the user actively picks a city
+  const [hasSelectedCity, setHasSelectedCity] = useState(false);
+
+  const handleCitySelect = (selectedCity) => {
+    setCity(selectedCity);
+    setHasSelectedCity(true);
+  };
+
   // ✅ Add loading state for initial data fetch
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -222,11 +233,12 @@ export default function Dashboard() {
       const result = await createEventWithRisk({
         name: eventName,
         city: city,
-        date: new Date().toISOString().split('T')[0],
+        date: eventDate,
         description: `Weather risk assessment for ${eventName} in ${city}`
       });
       
       setRiskAssessment(result);
+      setHasSelectedCity(true); // creating an event also reveals the list
       console.log("Risk Assessment Result:", result);
       console.log(`Risk level: ${result.eventRisk} - ${result.recommendation}`);
       
@@ -292,7 +304,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-black flex flex-col">
-      <Header city={city} setCity={setCity} />
+      <Header city={city} setCity={handleCitySelect} />
 
       <div className="flex flex-1 flex-col md:flex-row">
         <Sidebar 
@@ -314,11 +326,17 @@ export default function Dashboard() {
           <RiskAssessment
             eventName={eventName}
             setEventName={setEventName}
+            eventDate={eventDate}
+            setEventDate={setEventDate}
             loadingRisk={loadingRisk}
             riskAssessment={riskAssessment}
             assessEventRisk={assessEventRisk}
             city={city}
           />
+
+          {hasSelectedCity && (
+            <MyEvents city={city} refreshSignal={riskAssessment} />
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <BestDayCard score={score} formattedDate={formattedDate} />
@@ -332,9 +350,9 @@ export default function Dashboard() {
            {forecast && <WeatherCharts forecast={forecast} />}
           </div>
 
-            <StatsCards 
-              weather={weather} 
-              estimateWindFromCondition={estimateWindFromCondition} 
+            <StatsCards
+              weather={weather}
+              estimateWindFromCondition={estimateWindFromCondition}
             />
           </div>
         </div>
