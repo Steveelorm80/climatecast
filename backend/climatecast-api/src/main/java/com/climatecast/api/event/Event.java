@@ -25,5 +25,8 @@ public class Event {
     private String city;
     @Column(name = "event_date")
     private String date;
+
+    @Column(name = "user_id")
+    private String userId;
     private String description;
 }

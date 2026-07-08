@@ -1,6 +1,8 @@
 // components/Header.jsx
 "use client";
 
+import { UserButton } from "@clerk/nextjs";
+
 export default function Header({ city, setCity, isLoading = false }) {
   return (
     <div className="bg-white p-4 shadow flex flex-col md:flex-row md:justify-between md:items-center gap-3 sticky top-0 z-10">
@@ -25,6 +27,9 @@ export default function Header({ city, setCity, isLoading = false }) {
         >
           {isLoading ? "Loading..." : "Search"}
         </button>
+        <div className="flex items-center ml-1">
+          <UserButton afterSignOutUrl="/" />
+        </div>
       </div>
     </div>
   );

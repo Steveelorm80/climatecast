@@ -1,6 +1,9 @@
 package com.climatecast.api.event;
 
 import com.climatecast.api.weather.WeatherService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -24,6 +27,7 @@ public class EventService {
     }
 
     public Map<String, Object> create(Event event) {
+        event.setUserId(currentUserId());
         Event saved = repository.save(event);
 
         Map<String, Object> weather = fetchWeatherSafely(saved.getCity());
@@ -45,21 +49,24 @@ public class EventService {
     }
 
     public List<Event> getAll() {
-        return repository.findAll();
+        return repository.findByUserId(currentUserId());
     }
 
     public Optional<Event> getById(Long id) {
-        return repository.findById(id);
+        return repository.findByIdAndUserId(id, currentUserId());
     }
 
     public void delete(Long id) {
-        repository.deleteById(id);
+        repository.findByIdAndUserId(id, currentUserId())
+                .ifPresent(repository::delete);
     }
 
     public Map<String, Object> update(Long id, Event event) {
         Map<String, Object> response = new HashMap<>();
-        if (repository.existsById(id)) {
+        Optional<Event> existing = repository.findByIdAndUserId(id, currentUserId());
+        if (existing.isPresent()) {
             event.setId(id);
+            event.setUserId(existing.get().getUserId());
             Event saved = repository.save(event);
             response.put("success", true);
             response.put("event", saved);
@@ -68,6 +75,17 @@ public class EventService {
             response.put("message", "Event not found");
         }
         return response;
+    }
+
+    /**
+     * Clerk user id from the JWT subject; "dev-user" when auth is disabled.
+     */
+    private String currentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof JwtAuthenticationToken jwtAuth) {
+            return jwtAuth.getToken().getSubject();
+        }
+        return "dev-user";
     }
 
     private Map<String, Object> fetchWeatherSafely(String city) {
