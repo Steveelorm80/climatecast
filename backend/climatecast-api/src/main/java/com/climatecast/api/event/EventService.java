@@ -27,8 +27,20 @@ public class EventService {
     }
 
     public Map<String, Object> create(Event event) {
-        event.setUserId(currentUserId());
-        Event saved = repository.save(event);
+        String userId = currentUserId();
+
+        // Idempotent create: same name+city+date for this user reuses the existing event
+        Optional<Event> existing = repository.findFirstByUserIdAndNameIgnoreCaseAndCityIgnoreCaseAndDate(
+                userId, event.getName(), event.getCity(), event.getDate());
+        boolean alreadyExisted = existing.isPresent();
+
+        Event saved;
+        if (alreadyExisted) {
+            saved = existing.get();
+        } else {
+            event.setUserId(userId);
+            saved = repository.save(event);
+        }
 
         Map<String, Object> weather = fetchWeatherSafely(saved.getCity());
 
@@ -45,6 +57,7 @@ public class EventService {
         response.put("eventRisk", risk);
         response.put("recommendation", riskService.recommendation(risk));
         response.put("weather", weather);
+        response.put("alreadyExisted", alreadyExisted);
         return response;
     }
 

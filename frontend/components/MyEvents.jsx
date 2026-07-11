@@ -25,6 +25,7 @@ export default function MyEvents({ city, refreshSignal }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [cityOnly, setCityOnly] = useState(true);
+  const [showPast, setShowPast] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -70,6 +71,12 @@ export default function MyEvents({ city, refreshSignal }) {
 
   const filtered = useMemo(() => {
     let list = [...events];
+    if (!showPast) {
+      list = list.filter((e) => {
+        const days = daysFromToday(e.date);
+        return days === null || days >= 0;
+      });
+    }
     if (cityOnly && city) {
       list = list.filter(
         (e) => e.city && e.city.toLowerCase() === city.toLowerCase()
@@ -81,7 +88,7 @@ export default function MyEvents({ city, refreshSignal }) {
     }
     list.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
     return list;
-  }, [events, cityOnly, city, search]);
+  }, [events, cityOnly, city, search, showPast]);
 
   const visible = showAll ? filtered : filtered.slice(0, VISIBLE_LIMIT);
 
@@ -160,6 +167,17 @@ export default function MyEvents({ city, refreshSignal }) {
             title="Toggle between current city and all cities"
           >
             {cityOnly ? `📍 ${city}` : "🌍 All cities"}
+          </button>
+          <button
+            onClick={() => setShowPast(!showPast)}
+            className={`text-xs px-2 py-1 rounded-full border whitespace-nowrap ${
+              showPast
+                ? "bg-amber-500/15 border-amber-500/40 text-amber-300"
+                : "bg-navy-800 border-navy-700 text-ink-500"
+            }`}
+            title="Show or hide events whose date has passed"
+          >
+            {showPast ? "🕰 Incl. past" : "Upcoming"}
           </button>
         </div>
       </div>

@@ -62,6 +62,11 @@ export default function RiskAssessment({
           <h3 className="text-xl font-bold mb-2">
             Risk Level: {riskAssessment.eventRisk}
           </h3>
+          {riskAssessment.alreadyExisted && (
+            <p className="text-xs opacity-75 mb-2">
+              ℹ️ This event is already saved — showing its updated risk, no duplicate created.
+            </p>
+          )}
           <p className="mb-3 opacity-90">{riskAssessment.recommendation}</p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-3 pt-3 border-t border-white/10">

@@ -10,4 +10,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByUserId(String userId);
 
     Optional<Event> findByIdAndUserId(Long id, String userId);
+
+    Optional<Event> findFirstByUserIdAndNameIgnoreCaseAndCityIgnoreCaseAndDate(
+            String userId, String name, String city, String date);
 }
