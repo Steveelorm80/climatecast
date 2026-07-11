@@ -345,15 +345,15 @@ export default function Dashboard() {
             {/* <div className="md:col-span-2 bg-white p-4 rounded-2xl shadow overflow-x-auto">
               {forecast ? <WeatherChart data={chartData} /> : <LoadingSpinner message="Loading chart..." />}
             </div> */}
-            {/* HIGHLIGHT STATS - horizontal strip below AI insight */}
-            <StatsCards
-              weather={weather}
-              estimateWindFromCondition={estimateWindFromCondition}
-            />
+            {/* TOP 3 HIGHLIGHTS - horizontal strip below AI insight */}
+            <StatsCards weather={weather} variant="primary" />
 
-            {/* WEATHER CHARTS - full width below stats */}
-            <div className="md:col-span-3 space-y-6">
+            {/* TEMPERATURE CHART (2/3) + remaining highlights stacked (1/3) */}
+            <div className="md:col-span-2 space-y-6">
               {forecast && <WeatherCharts forecast={forecast} />}
+            </div>
+            <div className="flex flex-col gap-4">
+              <StatsCards weather={weather} variant="secondary" />
             </div>
           </div>
         </div>

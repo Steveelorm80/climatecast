@@ -35,16 +35,7 @@ function Gauge({ fraction, color, label }) {
   );
 }
 
-// Format a unix timestamp in the city's local time
-function cityTime(unix, tzOffsetSeconds) {
-  if (!unix) return "—";
-  return new Date((unix + (tzOffsetSeconds || 0)) * 1000).toLocaleTimeString(
-    "en-GB",
-    { hour: "2-digit", minute: "2-digit", timeZone: "UTC" }
-  );
-}
-
-export default function StatsCards({ weather }) {
+export default function StatsCards({ weather, variant = "all" }) {
   const wind = weather?.wind ?? null;
   const humidity = weather?.humidity ?? null;
 
@@ -67,15 +58,6 @@ export default function StatsCards({ weather }) {
   const aqi = weather?.aqi ?? null;
   const aqiColor =
     aqi == null ? "#6b7a93" : aqi <= 2 ? "#34d399" : aqi === 3 ? "#fbbf24" : "#f87171";
-
-  // Daylight progress in the city's timezone
-  const sunrise = weather?.sunrise;
-  const sunset = weather?.sunset;
-  const nowUnix = Date.now() / 1000;
-  const dayFrac =
-    sunrise && sunset && sunset > sunrise
-      ? (nowUnix - sunrise) / (sunset - sunrise)
-      : 0;
 
   const stats = [
     {
@@ -120,35 +102,41 @@ export default function StatsCards({ weather }) {
       fraction: aqi != null ? aqi / 5 : 0,
       label: aqi != null ? `${aqi}/5` : "—",
     },
-    {
-      title: "Daylight",
-      icon: "🌅",
-      detail: `${cityTime(sunrise, weather?.timezone)} – ${cityTime(sunset, weather?.timezone)}`,
-      color: "#fb923c",
-      fraction: dayFrac,
-      label:
-        dayFrac <= 0 ? "Night" : dayFrac >= 1 ? "Night" : `${Math.round(dayFrac * 100)}%`,
-    },
   ];
+
+  const renderCard = (stat, index) => (
+    <div
+      key={index}
+      className="bg-navy-900 border border-navy-700 p-4 rounded-xl"
+    >
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xl">{stat.icon}</span>
+        <span className="text-sm text-ink-500">{stat.title}</span>
+      </div>
+      <Gauge fraction={stat.fraction} color={stat.color} label={stat.label} />
+      <p className="text-center text-xs text-ink-500 mt-1">{stat.detail}</p>
+    </div>
+  );
+
+  // primary: first 3 in a horizontal strip; secondary: last 3 stacked vertically
+  if (variant === "primary") {
+    return (
+      <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <h3 className="text-sm font-bold text-ink-500 tracking-widest col-span-full">
+          TODAY'S HIGHLIGHTS
+        </h3>
+        {stats.slice(0, 3).map(renderCard)}
+      </div>
+    );
+  }
+
+  if (variant === "secondary") {
+    return <>{stats.slice(3).map(renderCard)}</>;
+  }
 
   return (
     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <h3 className="text-sm font-bold text-ink-500 tracking-widest col-span-full">
-        TODAY'S HIGHLIGHTS
-      </h3>
-      {stats.map((stat, index) => (
-        <div
-          key={index}
-          className="bg-navy-900 border border-navy-700 p-4 rounded-xl"
-        >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xl">{stat.icon}</span>
-            <span className="text-sm text-ink-500">{stat.title}</span>
-          </div>
-          <Gauge fraction={stat.fraction} color={stat.color} label={stat.label} />
-          <p className="text-center text-xs text-ink-500 mt-1">{stat.detail}</p>
-        </div>
-      ))}
+      {stats.map(renderCard)}
     </div>
   );
 }
