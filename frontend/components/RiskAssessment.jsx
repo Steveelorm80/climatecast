@@ -16,19 +16,19 @@ export default function RiskAssessment({
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="bg-white p-4 md:p-6 rounded-2xl shadow mb-6">
-      <h2 className="text-xl font-bold mb-4">🎯 Event Risk Assessment</h2>
+    <div className="bg-navy-900 border border-navy-700 p-4 md:p-6 rounded-2xl mb-6">
+      <h2 className="text-xl font-bold text-ink-100 mb-4">🎯 Event Risk Assessment</h2>
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <input
           type="text"
           placeholder="Event name (e.g., Music Festival)"
-          className="flex-1 border px-3 py-2 rounded-lg"
+          className="flex-1 bg-navy-800 border border-navy-700 text-ink-100 placeholder-ink-500 px-3 py-2 rounded-lg focus:outline-none focus:border-emerald-500"
           value={eventName}
           onChange={(e) => setEventName(e.target.value)}
         />
         <input
           type="date"
-          className="border px-3 py-2 rounded-lg"
+          className="bg-navy-800 border border-navy-700 text-ink-100 px-3 py-2 rounded-lg focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
           value={eventDate}
           min={today}
           onChange={(e) => setEventDate(e.target.value)}
@@ -37,7 +37,7 @@ export default function RiskAssessment({
         <button
           onClick={assessEventRisk}
           disabled={loadingRisk}
-          className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 disabled:bg-gray-400 whitespace-nowrap"
+          className="bg-emerald-500 hover:bg-emerald-400 text-navy-950 font-semibold px-6 py-2 rounded-lg disabled:bg-navy-700 disabled:text-ink-500 whitespace-nowrap"
         >
           {loadingRisk ? "Assessing..." : "Assess Risk"}
         </button>
@@ -45,12 +45,12 @@ export default function RiskAssessment({
 
       {/* Loading Spinner */}
       {loadingRisk && (
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="mt-4 p-4 bg-navy-800 rounded-lg border border-navy-700">
           <div className="flex items-center gap-3 flex-wrap">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div>
             <div>
-              <p className="text-blue-800 font-medium">Analyzing weather data...</p>
-              <p className="text-blue-600 text-sm">Checking conditions in {city}</p>
+              <p className="text-ink-100 font-medium">Analyzing weather data...</p>
+              <p className="text-ink-500 text-sm">Checking conditions in {city}</p>
             </div>
           </div>
         </div>
@@ -62,27 +62,27 @@ export default function RiskAssessment({
           <h3 className="text-xl font-bold mb-2">
             Risk Level: {riskAssessment.eventRisk}
           </h3>
-          <p className="mb-3">{riskAssessment.recommendation}</p>
+          <p className="mb-3 opacity-90">{riskAssessment.recommendation}</p>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-3 pt-3 border-t border-white/20">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-3 pt-3 border-t border-white/10">
             <div>
-              <p className="text-sm opacity-90">Temperature</p>
+              <p className="text-sm opacity-70">Temperature</p>
               <p className="font-bold">{riskAssessment.weather?.temperature}°C</p>
             </div>
             <div>
-              <p className="text-sm opacity-90">Condition</p>
+              <p className="text-sm opacity-70">Condition</p>
               <p className="font-bold capitalize">{riskAssessment.weather?.condition}</p>
             </div>
             <div>
-              <p className="text-sm opacity-90">Humidity</p>
+              <p className="text-sm opacity-70">Humidity</p>
               <p className="font-bold">{riskAssessment.weather?.humidity}%</p>
             </div>
             <div>
-              <p className="text-sm opacity-90">Wind</p>
+              <p className="text-sm opacity-70">Wind</p>
               <p className="font-bold">{riskAssessment.weather?.wind} m/s</p>
             </div>
             <div>
-              <p className="text-sm opacity-90">Rain</p>
+              <p className="text-sm opacity-70">Rain</p>
               <p className="font-bold">{riskAssessment.weather?.rainProbability}%</p>
             </div>
           </div>

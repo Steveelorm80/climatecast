@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -45,7 +46,82 @@ public class WeatherService {
         result.put("condition", weather.get("main"));
         result.put("description", weather.get("description"));
 
+        // Extra metrics available in the same response
+        if (main.get("feels_like") != null) {
+            result.put("feelsLike", ((Number) main.get("feels_like")).doubleValue());
+        }
+        if (main.get("pressure") != null) {
+            result.put("pressure", ((Number) main.get("pressure")).intValue());
+        }
+        if (response.get("visibility") != null) {
+            result.put("visibility", ((Number) response.get("visibility")).intValue());
+        }
+        Map<String, Object> sys = (Map<String, Object>) response.get("sys");
+        if (sys != null) {
+            result.put("sunrise", sys.get("sunrise"));
+            result.put("sunset", sys.get("sunset"));
+        }
+        result.put("timezone", response.get("timezone"));
+
+        Map<String, Object> coord = (Map<String, Object>) response.get("coord");
+        if (coord != null) {
+            double lat = ((Number) coord.get("lat")).doubleValue();
+            double lon = ((Number) coord.get("lon")).doubleValue();
+            enrichWithAirQuality(result, lat, lon);
+            enrichWithUvIndex(result, lat, lon);
+        }
+
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void enrichWithAirQuality(Map<String, Object> result, double lat, double lon) {
+        try {
+            String url = String.format(Locale.US,
+                    "https://api.openweathermap.org/data/2.5/air_pollution?lat=%f&lon=%f&appid=%s",
+                    lat, lon, apiKey);
+            Map<String, Object> resp = restTemplate.getForObject(url, Map.class);
+            List<Map<String, Object>> list = (List<Map<String, Object>>) resp.get("list");
+            if (list != null && !list.isEmpty()) {
+                Map<String, Object> entry = list.get(0);
+                Map<String, Object> aqiMain = (Map<String, Object>) entry.get("main");
+                Map<String, Object> components = (Map<String, Object>) entry.get("components");
+                int aqi = ((Number) aqiMain.get("aqi")).intValue();
+                result.put("aqi", aqi);
+                result.put("aqiLabel", switch (aqi) {
+                    case 1 -> "Good";
+                    case 2 -> "Fair";
+                    case 3 -> "Moderate";
+                    case 4 -> "Poor";
+                    case 5 -> "Very Poor";
+                    default -> "Unknown";
+                });
+                if (components != null && components.get("pm2_5") != null) {
+                    result.put("pm25", ((Number) components.get("pm2_5")).doubleValue());
+                }
+            }
+        } catch (Exception e) {
+            // Air quality is optional; never break the main weather response
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void enrichWithUvIndex(Map<String, Object> result, double lat, double lon) {
+        try {
+            String url = String.format(Locale.US,
+                    "https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&daily=uv_index_max&forecast_days=1&timezone=UTC",
+                    lat, lon);
+            Map<String, Object> resp = restTemplate.getForObject(url, Map.class);
+            Map<String, Object> daily = (Map<String, Object>) resp.get("daily");
+            if (daily != null) {
+                List<Number> uv = (List<Number>) daily.get("uv_index_max");
+                if (uv != null && !uv.isEmpty() && uv.get(0) != null) {
+                    result.put("uvIndex", uv.get(0).doubleValue());
+                }
+            }
+        } catch (Exception e) {
+            // UV is optional; never break the main weather response
+        }
     }
 
     @Cacheable(value = "forecast", key = "#city.toLowerCase()")

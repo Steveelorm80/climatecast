@@ -33,6 +33,21 @@ export default function MyEvents({ city, refreshSignal }) {
   const [riskById, setRiskById] = useState({});
   const [riskLoadingId, setRiskLoadingId] = useState(null);
 
+  const load = async () => {
+    try {
+      const data = await getAllEvents();
+      setEvents(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load events:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, [refreshSignal]);
+
   const loadRisk = async (event) => {
     const days = daysFromToday(event.date);
     if (days === null || days < 0 || days > FORECAST_DAYS) return;
@@ -53,21 +68,6 @@ export default function MyEvents({ city, refreshSignal }) {
     if (next && !riskById[event.id]) loadRisk(event);
   };
 
-  const load = async () => {
-    try {
-      const data = await getAllEvents();
-      setEvents(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Failed to load events:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, [refreshSignal]);
-
   const filtered = useMemo(() => {
     let list = [...events];
     if (cityOnly && city) {
@@ -79,7 +79,6 @@ export default function MyEvents({ city, refreshSignal }) {
       const q = search.trim().toLowerCase();
       list = list.filter((e) => e.name && e.name.toLowerCase().includes(q));
     }
-    // Soonest first
     list.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
     return list;
   }, [events, cityOnly, city, search]);
@@ -114,7 +113,6 @@ export default function MyEvents({ city, refreshSignal }) {
       if (result?.success) {
         setEvents((prev) => prev.map((e) => (e.id === id ? result.event : e)));
         setEditingId(null);
-        // Date or city may have changed — refresh the risk
         setRiskById((prev) => {
           const next = { ...prev };
           delete next[id];
@@ -132,12 +130,15 @@ export default function MyEvents({ city, refreshSignal }) {
     }
   };
 
+  const inputCls =
+    "bg-navy-800 border border-navy-700 text-ink-100 placeholder-ink-500 px-2 py-1 rounded focus:outline-none focus:border-emerald-500";
+
   return (
-    <div className="bg-white p-4 rounded-2xl shadow mb-6">
+    <div className="bg-navy-900 border border-navy-700 p-4 rounded-2xl mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-        <h2 className="font-bold">
+        <h2 className="font-bold text-ink-100">
           📅 My Events{" "}
-          <span className="text-gray-400 font-normal text-sm">
+          <span className="text-ink-500 font-normal text-sm">
             ({filtered.length})
           </span>
         </h2>
@@ -145,7 +146,7 @@ export default function MyEvents({ city, refreshSignal }) {
           <input
             type="text"
             placeholder="Search events..."
-            className="border px-2 py-1 rounded-lg text-sm w-36"
+            className={`${inputCls} text-sm w-36`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -153,8 +154,8 @@ export default function MyEvents({ city, refreshSignal }) {
             onClick={() => setCityOnly(!cityOnly)}
             className={`text-xs px-2 py-1 rounded-full border whitespace-nowrap ${
               cityOnly
-                ? "bg-blue-100 border-blue-300 text-blue-700"
-                : "bg-gray-100 border-gray-300 text-gray-600"
+                ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                : "bg-navy-800 border-navy-700 text-ink-500"
             }`}
             title="Toggle between current city and all cities"
           >
@@ -164,40 +165,40 @@ export default function MyEvents({ city, refreshSignal }) {
       </div>
 
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading events...</p>
+        <p className="text-ink-500 text-sm">Loading events...</p>
       ) : filtered.length === 0 ? (
-        <p className="text-gray-500 text-sm">
+        <p className="text-ink-500 text-sm">
           {cityOnly
             ? `No events in ${city}. Switch to "All cities" or assess an event above.`
             : "No saved events yet. Assess an event above to save it."}
         </p>
       ) : (
-        <ul className={`divide-y ${showAll ? "max-h-72 overflow-y-auto pr-1" : ""}`}>
+        <ul className={`divide-y divide-navy-700 ${showAll ? "max-h-72 overflow-y-auto pr-1" : ""}`}>
           {visible.map((event) => (
             <li key={event.id} className="py-2">
               {/* Row */}
               <div
-                className="flex justify-between items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-1"
+                className="flex justify-between items-center gap-2 cursor-pointer hover:bg-navy-800 rounded px-1"
                 onClick={() => toggleExpand(event)}
               >
                 <div>
-                  <span className="font-medium">{event.name}</span>
-                  <span className="text-gray-500 text-sm ml-2">
+                  <span className="font-medium text-ink-100">{event.name}</span>
+                  <span className="text-ink-500 text-sm ml-2">
                     {event.city} · {event.date}
                   </span>
                 </div>
-                <span className="text-gray-400 text-xs">
+                <span className="text-ink-500 text-xs">
                   {expandedId === event.id ? "▲" : "▼"}
                 </span>
               </div>
 
               {/* Expanded detail / edit */}
               {expandedId === event.id && (
-                <div className="mt-2 ml-1 p-3 bg-gray-50 rounded-lg text-sm">
+                <div className="mt-2 ml-1 p-3 bg-navy-800 border border-navy-700 rounded-lg text-sm">
                   {editingId === event.id ? (
                     <div className="space-y-2">
                       <input
-                        className="border px-2 py-1 rounded w-full"
+                        className={`${inputCls} w-full`}
                         value={editForm.name}
                         onChange={(e) =>
                           setEditForm({ ...editForm, name: e.target.value })
@@ -206,7 +207,7 @@ export default function MyEvents({ city, refreshSignal }) {
                       />
                       <div className="flex gap-2">
                         <input
-                          className="border px-2 py-1 rounded flex-1"
+                          className={`${inputCls} flex-1`}
                           value={editForm.city}
                           onChange={(e) =>
                             setEditForm({ ...editForm, city: e.target.value })
@@ -215,7 +216,7 @@ export default function MyEvents({ city, refreshSignal }) {
                         />
                         <input
                           type="date"
-                          className="border px-2 py-1 rounded"
+                          className={`${inputCls} [color-scheme:dark]`}
                           value={editForm.date}
                           onChange={(e) =>
                             setEditForm({ ...editForm, date: e.target.value })
@@ -223,7 +224,7 @@ export default function MyEvents({ city, refreshSignal }) {
                         />
                       </div>
                       <textarea
-                        className="border px-2 py-1 rounded w-full"
+                        className={`${inputCls} w-full`}
                         rows={2}
                         value={editForm.description}
                         onChange={(e) =>
@@ -238,13 +239,13 @@ export default function MyEvents({ city, refreshSignal }) {
                         <button
                           onClick={() => saveEdit(event.id)}
                           disabled={saving}
-                          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:bg-gray-400"
+                          className="bg-emerald-500 hover:bg-emerald-400 text-navy-950 font-semibold px-3 py-1 rounded disabled:bg-navy-700 disabled:text-ink-500"
                         >
                           {saving ? "Saving..." : "Save"}
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="border px-3 py-1 rounded hover:bg-gray-100"
+                          className="border border-navy-700 text-ink-300 px-3 py-1 rounded hover:bg-navy-900"
                         >
                           Cancel
                         </button>
@@ -252,7 +253,7 @@ export default function MyEvents({ city, refreshSignal }) {
                     </div>
                   ) : (
                     <>
-                      <p className="text-gray-600 mb-2">
+                      <p className="text-ink-300 mb-2">
                         {event.description || "No description."}
                       </p>
 
@@ -262,14 +263,14 @@ export default function MyEvents({ city, refreshSignal }) {
                         const risk = riskById[event.id];
                         if (days !== null && days < 0) {
                           return (
-                            <p className="text-gray-400 mb-2 text-xs">
+                            <p className="text-ink-500 mb-2 text-xs">
                               This event date has passed.
                             </p>
                           );
                         }
                         if (days !== null && days > FORECAST_DAYS) {
                           return (
-                            <p className="text-gray-400 mb-2 text-xs">
+                            <p className="text-ink-500 mb-2 text-xs">
                               ⏳ Forecast opens ~{FORECAST_DAYS} days before the
                               event ({days} days away).
                             </p>
@@ -277,7 +278,7 @@ export default function MyEvents({ city, refreshSignal }) {
                         }
                         if (riskLoadingId === event.id) {
                           return (
-                            <p className="text-gray-500 mb-2 text-xs">
+                            <p className="text-ink-500 mb-2 text-xs">
                               Checking current forecast...
                             </p>
                           );
@@ -295,8 +296,8 @@ export default function MyEvents({ city, refreshSignal }) {
                                   comfort {Math.round(risk.comfortScore)}/100
                                 </span>
                               </p>
-                              <p className="text-xs">{risk.recommendation}</p>
-                              <p className="text-xs opacity-80 mt-1">
+                              <p className="text-xs opacity-90">{risk.recommendation}</p>
+                              <p className="text-xs opacity-75 mt-1">
                                 🌡 {risk.avgTemp?.toFixed(1)}°C · 💨{" "}
                                 {risk.maxWind?.toFixed(1)} m/s · 🌧{" "}
                                 {risk.rainAmount?.toFixed(1)} mm
@@ -310,13 +311,13 @@ export default function MyEvents({ city, refreshSignal }) {
                       <div className="flex gap-2">
                         <button
                           onClick={() => startEdit(event)}
-                          className="border px-3 py-1 rounded hover:bg-gray-100"
+                          className="border border-navy-700 text-ink-300 px-3 py-1 rounded hover:bg-navy-900"
                         >
                           ✏️ Edit
                         </button>
                         <button
                           onClick={() => handleDelete(event.id)}
-                          className="border border-red-200 text-red-600 px-3 py-1 rounded hover:bg-red-50"
+                          className="border border-red-500/40 text-red-300 px-3 py-1 rounded hover:bg-red-500/10"
                         >
                           🗑 Delete
                         </button>
@@ -333,7 +334,7 @@ export default function MyEvents({ city, refreshSignal }) {
       {filtered.length > VISIBLE_LIMIT && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="mt-2 text-blue-600 text-sm hover:underline"
+          className="mt-2 text-emerald-400 text-sm hover:underline"
         >
           {showAll ? "Show less" : `Show all ${filtered.length} events`}
         </button>

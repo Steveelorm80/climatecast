@@ -286,14 +286,14 @@ export default function Dashboard() {
   // ✅ Show error state if something went wrong
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+      <div className="min-h-screen bg-navy-950 flex items-center justify-center">
+        <div className="bg-navy-900 border border-navy-700 rounded-2xl p-8 max-w-md text-center">
           <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-red-600 mb-2">Oops! Something went wrong</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h2 className="text-2xl font-bold text-red-400 mb-2">Oops! Something went wrong</h2>
+          <p className="text-ink-300 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-emerald-500 text-navy-950 font-semibold px-6 py-2 rounded-lg hover:bg-emerald-400"
           >
             Try Again
           </button>
@@ -303,7 +303,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 text-black flex flex-col">
+    <div className="min-h-screen bg-navy-950 text-ink-100 flex flex-col">
       <Header city={city} setCity={handleCitySelect} />
 
       <div className="flex flex-1 flex-col md:flex-row">
@@ -345,15 +345,16 @@ export default function Dashboard() {
             {/* <div className="md:col-span-2 bg-white p-4 rounded-2xl shadow overflow-x-auto">
               {forecast ? <WeatherChart data={chartData} /> : <LoadingSpinner message="Loading chart..." />}
             </div> */}
-            {/* WEATHER CHARTS - Takes 2/3 on desktop, full on mobile */}
-            <div className="md:col-span-2 space-y-6">
-           {forecast && <WeatherCharts forecast={forecast} />}
-          </div>
-
+            {/* HIGHLIGHT STATS - horizontal strip below AI insight */}
             <StatsCards
               weather={weather}
               estimateWindFromCondition={estimateWindFromCondition}
             />
+
+            {/* WEATHER CHARTS - full width below stats */}
+            <div className="md:col-span-3 space-y-6">
+              {forecast && <WeatherCharts forecast={forecast} />}
+            </div>
           </div>
         </div>
       </div>

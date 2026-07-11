@@ -1,10 +1,14 @@
 // utils/riskUtils.js
 export const getRiskColor = (risk) => {
-  switch(risk) {
-    case 'HIGH': return 'bg-red-500 text-white';
-    case 'MEDIUM': return 'bg-yellow-500 text-black';
-    case 'LOW': return 'bg-green-500 text-white';
-    default: return 'bg-gray-500 text-white';
+  switch (risk) {
+    case "HIGH":
+      return "bg-red-500/15 text-red-300 border border-red-500/40";
+    case "MEDIUM":
+      return "bg-amber-500/15 text-amber-300 border border-amber-500/40";
+    case "LOW":
+      return "bg-emerald-500/15 text-emerald-300 border border-emerald-500/40";
+    default:
+      return "bg-navy-800 text-ink-300 border border-navy-700";
   }
 };
 
